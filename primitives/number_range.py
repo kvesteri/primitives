@@ -15,7 +15,53 @@ class RangeBoundsException(NumberRangeException):
 
 
 @total_ordering
-class NumberRange(object):
+class Range(object):
+    def __eq__(self, other):
+        try:
+            return (
+                self.lower == other.lower and
+                self.upper == other.upper
+            )
+        except AttributeError:
+            return NotImplemented
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __gt__(self, other):
+        try:
+            return self.lower > other.lower and self.upper > other.upper
+        except AttributeError:
+            return NotImplemented
+
+    def __repr__(self):
+        return 'NumberRange(%r, %r)' % (self.lower, self.upper)
+
+    def __str__(self):
+        if self.lower != self.upper:
+            return '%s - %s' % (self.lower, self.upper)
+        return str(self.lower)
+
+    def __add__(self, other):
+        try:
+            return NumberRange(
+                self.lower + other.lower,
+                self.upper + other.upper
+            )
+        except AttributeError:
+            return NotImplemented
+
+    def __sub__(self, other):
+        try:
+            return NumberRange(
+                self.lower - other.lower,
+                self.upper - other.upper
+            )
+        except AttributeError:
+            return NotImplemented
+
+
+class NumberRange(Range):
     def __init__(self, *args):
         if len(args) > 2:
             raise NumberRangeException(
@@ -101,47 +147,3 @@ class NumberRange(object):
     @property
     def normalized(self):
         return '[%s, %s]' % (self.lower, self.upper)
-
-    def __eq__(self, other):
-        try:
-            return (
-                self.lower == other.lower and
-                self.upper == other.upper
-            )
-        except AttributeError:
-            return NotImplemented
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __gt__(self, other):
-        try:
-            return self.lower > other.lower and self.upper > other.upper
-        except AttributeError:
-            return NotImplemented
-
-    def __repr__(self):
-        return 'NumberRange(%r, %r)' % (self.lower, self.upper)
-
-    def __str__(self):
-        if self.lower != self.upper:
-            return '%s - %s' % (self.lower, self.upper)
-        return str(self.lower)
-
-    def __add__(self, other):
-        try:
-            return NumberRange(
-                self.lower + other.lower,
-                self.upper + other.upper
-            )
-        except AttributeError:
-            return NotImplemented
-
-    def __sub__(self, other):
-        try:
-            return NumberRange(
-                self.lower - other.lower,
-                self.upper - other.upper
-            )
-        except AttributeError:
-            return NotImplemented

@@ -40,13 +40,29 @@ class TestNumberRangeInit(object):
 
 
 class TestComparisonOperators(object):
-    def test_equality_operator(self):
+    def test_eq_operator(self):
         assert NumberRange(1, 3) == NumberRange(1, 3)
         assert not NumberRange(1, 3) == NumberRange(1, 4)
 
-    def test_inequality_operator(self):
+    def test_ne_operator(self):
         assert not NumberRange(1, 3) != NumberRange(1, 3)
         assert NumberRange(1, 3) != NumberRange(1, 4)
+
+    def test_gt_operator(self):
+        assert NumberRange(1, 3) > NumberRange(0, 2)
+        assert not NumberRange(2, 3) > NumberRange(2, 3)
+
+    def test_ge_operator(self):
+        assert NumberRange(1, 3) >= NumberRange(0, 2)
+        assert NumberRange(1, 3) >= NumberRange(1, 3)
+
+    def test_lt_operator(self):
+        assert NumberRange(0, 2) < NumberRange(1, 3)
+        assert not NumberRange(2, 3) < NumberRange(2, 3)
+
+    def test_le_operator(self):
+        assert NumberRange(0, 2) <= NumberRange(1, 3)
+        assert NumberRange(1, 3) >= NumberRange(1, 3)
 
 
 def test_str_representation():
