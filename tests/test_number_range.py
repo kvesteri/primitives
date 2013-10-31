@@ -3,34 +3,50 @@ from primitives import NumberRange, NumberRangeException
 
 
 class TestNumberRangeInit(object):
-    def test_init_supports_multiple_args(args):
+    def test_support_range_object(self):
+        num_range = NumberRange(NumberRange(1, 3))
+        assert num_range.lower == 1
+        assert num_range.upper == 3
+
+    def test_supports_multiple_args(self):
         num_range = NumberRange(1, 3)
         assert num_range.lower == 1
         assert num_range.upper == 3
 
-    def test_init_supports_strings(args):
+    def test_supports_strings(self):
         num_range = NumberRange('1-3')
         assert num_range.lower == 1
         assert num_range.upper == 3
 
-    def test_init_supports_strings_with_spaces(args):
+    def test_supports_strings_with_spaces(self):
         num_range = NumberRange('1 - 3')
         assert num_range.lower == 1
         assert num_range.upper == 3
 
-    def test_init_supports_exact_ranges_as_strings(args):
+    def test_supports_strings_with_bounds(self):
+        num_range = NumberRange('[1, 3]')
+        assert num_range.lower == 1
+        assert num_range.upper == 3
+
+    def test_supports_exact_ranges_as_strings(self):
         num_range = NumberRange('3')
         assert num_range.lower == 3
         assert num_range.upper == 3
 
-    def test_init_supports_integers(args):
+    def test_supports_integers(self):
         num_range = NumberRange(3)
         assert num_range.lower == 3
         assert num_range.upper == 3
 
 
-def test_equality_operator():
-    assert NumberRange(1, 3) == NumberRange(1, 3)
+class TestComparisonOperators(object):
+    def test_equality_operator(self):
+        assert NumberRange(1, 3) == NumberRange(1, 3)
+        assert not NumberRange(1, 3) == NumberRange(1, 4)
+
+    def test_inequality_operator(self):
+        assert not NumberRange(1, 3) != NumberRange(1, 3)
+        assert NumberRange(1, 3) != NumberRange(1, 4)
 
 
 def test_str_representation():
@@ -48,10 +64,10 @@ def test_from_str_exception_handling():
         NumberRange('1 - ')
 
 
-def test_from_normalized_str():
-    assert str(NumberRange.from_normalized_str('[1,2]')) == '1 - 2'
-    assert str(NumberRange.from_normalized_str('[1,3)')) == '1 - 2'
-    assert str(NumberRange.from_normalized_str('(1,3)')) == '2'
+# def test_from_normalized_str():
+#     assert str(NumberRange.from_normalized_str('[1,2]')) == '1 - 2'
+#     assert str(NumberRange.from_normalized_str('[1,3)')) == '1 - 2'
+#     assert str(NumberRange.from_normalized_str('(1,3)')) == '2'
 
 
 class TestArithmeticOperators(object):

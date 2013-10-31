@@ -1,4 +1,5 @@
 import six
+from functools import total_ordering
 
 
 class NumberRangeException(Exception):
@@ -13,6 +14,7 @@ class RangeBoundsException(NumberRangeException):
         )
 
 
+@total_ordering
 class NumberRange(object):
     def __init__(self, *args):
         if len(args) > 2:
@@ -25,26 +27,27 @@ class NumberRange(object):
                 raise RangeBoundsException(lower, upper)
             self.lower = lower
             self.upper = upper
+            self.lower_inc = self.upper_inc = True
         else:
             if isinstance(args[0], six.integer_types):
                 self.lower = self.upper = args[0]
+                self.lower_inc = self.upper_inc = True
             elif isinstance(args[0], six.string_types):
-                self.lower, self.upper = self.parse_range(args[0])
+                if ',' not in args[0]:
+                    self.lower, self.upper = self.parse_range(args[0])
+                    self.lower_inc = self.upper_inc = True
+                else:
+                    self.from_range_with_bounds(args[0])
+            elif hasattr(args[0], 'lower') and hasattr(args[0], 'upper'):
+                self.lower = args[0].lower
+                self.upper = args[0].upper
+                if not args[0].lower_inc:
+                    self.lower += 1
 
-    @classmethod
-    def from_range_object(cls, value):
-        lower = value.lower
-        upper = value.upper
-        if not value.lower_inc:
-            lower += 1
+                if not args[0].upper_inc:
+                    self.upper -= 1
 
-        if not value.upper_inc:
-            upper -= 1
-
-        return cls(lower, upper)
-
-    @classmethod
-    def from_normalized_str(cls, value):
+    def from_range_with_bounds(self, value):
         """
         Returns new NumberRange object from normalized number range format.
 
@@ -62,22 +65,24 @@ class NumberRange(object):
             range.lower = 24
             range.upper = 44
         """
-        if value is not None:
-            values = value[1:-1].split(',')
-            try:
-                lower, upper = map(
-                    lambda a: int(a.strip()), values
-                )
-            except ValueError as e:
-                raise NumberRangeException(e.message)
+        values = value[1:-1].split(',')
+        try:
+            lower, upper = map(
+                lambda a: int(a.strip()), values
+            )
+        except ValueError as e:
+            raise NumberRangeException(e.message)
 
-            if value[0] == '(':
-                lower += 1
+        self.lower_inc = value[0] == '('
+        if self.lower_inc:
+            lower += 1
 
-            if value[-1] == ')':
-                upper -= 1
+        self.upper_inc = value[-1] == ')'
+        if self.upper_inc:
+            upper -= 1
 
-            return cls(lower, upper)
+        self.lower = lower
+        self.upper = upper
 
     def parse_range(self, value):
         if value is not None:
@@ -103,6 +108,15 @@ class NumberRange(object):
                 self.lower == other.lower and
                 self.upper == other.upper
             )
+        except AttributeError:
+            return NotImplemented
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __gt__(self, other):
+        try:
+            return self.lower > other.lower and self.upper > other.upper
         except AttributeError:
             return NotImplemented
 
